@@ -7,7 +7,8 @@ from django.conf.urls.static import static
 
 from django.contrib.auth import views as auth_views
 
-from hrd.views import register
+from hrd.views import register, applicant_create_view
+
 
 # Redirect to admin
 def redirect_to_admin(request):
@@ -20,6 +21,8 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('redirect/', redirect_to_admin, name='redirect'),
     path('dashboard/', admin.site.urls),
+    path('applicant/new/', applicant_create_view, name='applicant_create'),
+
 
 ]
 

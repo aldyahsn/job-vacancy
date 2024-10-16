@@ -57,6 +57,7 @@ INSTALLED_APPS += [
     'hrd',
 
     "django_bootstrap5",
+    "fieldsets_with_inlines",
 ]
 
 MIDDLEWARE = [

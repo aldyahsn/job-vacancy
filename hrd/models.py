@@ -383,3 +383,45 @@ class Family(models.Model):
 
     def __str__(self):
         return f"{self.relationship}: {self.name}"
+
+
+class ApplicantReference(models.Model):
+    # Type Choices for Reference
+    EMPLOYMENT = 'Employment'
+    PERSONAL = 'Personal'
+
+    REFERENCE_TYPE_CHOICES = [
+        (EMPLOYMENT, 'Employment'),
+        (PERSONAL, 'Personal'),
+    ]
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='references')
+
+    # Reference type (Employment or Personal)
+    reference_type = models.CharField(max_length=20, choices=REFERENCE_TYPE_CHOICES, help_text="Type of reference: Employment or Personal")
+
+    # Basic Information for the Applicant Reference
+    name = models.CharField(max_length=255, help_text="Name of the reference")
+    position = models.CharField(max_length=255, help_text="Position of the reference")
+    company_name = models.CharField(max_length=255, help_text="Company name where the reference works")
+    company_address = models.TextField(help_text="Company address of the reference")
+
+    # Contact Information
+    office_phone = models.CharField(max_length=20, blank=True, null=True, help_text="Office phone number")
+    residence_phone = models.CharField(max_length=20, blank=True, null=True, help_text="Residence phone number")
+
+    # Years of Acquaintance
+    years_of_acquaintance = models.PositiveIntegerField(help_text="Number of years the applicant has known the reference")
+
+    def __str__(self):
+        return f"{self.name} ({self.reference_type})"
+
+class Submission(models.Model):
+    # ForeignKey to Applicant
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name='submissions')
+
+    # Submission for company with a pending application
+    company_name = models.CharField(max_length=255, help_text="Name of the company with a pending application")
+    date_of_application = models.DateField(help_text="Date of application for the company")
+
+    def __str__(self):
+        return f"Submission for {self.company_name} on {self.date_of_application}"

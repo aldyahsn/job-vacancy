@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+
+    <div class="container-fluid d-flex justify-content-center mt-5 bg-dark-subtle">
+        <div class="row border border-grey bg-white">
+            <div class="col-12 d-flex flex-column justify-content-center p-md-5">
+                <h2>Submit Your Information</h2>
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    {{ form.media }}
+                    {% bootstrap_form form %}
+                    {% bootstrap_button button_type="submit" button_class="btn btn-primary px-5" content="Submit" %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
