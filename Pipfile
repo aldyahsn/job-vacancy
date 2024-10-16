@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 rockstarter = "*"
 django-bootstrap5 = "*"
+django-admin-interface = "*"
 
 [dev-packages]
 

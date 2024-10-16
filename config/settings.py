@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import mimetypes
+
 mimetypes.add_type("text/css", ".css", True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -34,7 +35,6 @@ DEBUG = env.bool('DEBUG')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
-
 # Application definition
 INSTALLED_APPS = []
 if DEBUG:
@@ -43,12 +43,20 @@ if DEBUG:
     ]
 
 INSTALLED_APPS += [
+
+    "admin_interface",
+    "colorfield",
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'hrd',
+
+    "django_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -84,14 +92,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     'default': env.db(),
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -111,7 +117,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -122,7 +127,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -144,7 +148,6 @@ if env.bool('IS_S3'):
     AWS_S3_VERIFY = True
     AWS_S3_ENDPOINT_URL = 'https://sgp1.vultrobjects.com'
 
-
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'public' / 'media'
 
@@ -164,3 +167,19 @@ if env.bool("IS_S3"):
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
+SILENCED_SYSTEM_CHECKS = ["security.W019"]
+
+
+LOGIN_REDIRECT_URL = 'redirect'  # Redirect after login (you can customize this)
+LOGOUT_REDIRECT_URL = 'login'  # Redirect after logout
+
+from django.contrib.messages import constants as message_constants
+MESSAGE_TAGS = {
+    message_constants.DEBUG: 'secondary',
+    message_constants.INFO: 'info',
+    message_constants.SUCCESS: 'success',
+    message_constants.WARNING: 'warning',
+    message_constants.ERROR: 'danger',
+}
