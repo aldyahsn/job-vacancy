@@ -46,4 +46,11 @@ class ApplicantForm(forms.ModelForm):
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'availability_date': forms.DateInput(attrs={'type': 'date'}),
+            'marital_status': forms.RadioSelect,  # Render the field as radio buttons
+            'nationality': forms.RadioSelect,  # Render the field as radio buttons
+            'race': forms.RadioSelect,  # Render the field as radio buttons
+            'religion': forms.RadioSelect,  # Render the field as radio buttons
+            'business_type': forms.RadioSelect,  # Render the field as radio buttons
+            'living_situation': forms.RadioSelect,  # Render the field as radio buttons
+            'sex': forms.RadioSelect,  # Render the field as radio buttons
         }

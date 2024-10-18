@@ -1,4 +1,6 @@
+from django.contrib.auth.models import User
 from django.db import models
+from multiselectfield import MultiSelectField
 
 
 # Create your models here.
@@ -52,9 +54,15 @@ class Job(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        verbose_name = "Job Vacancy"  # This changes the singular name in the admin
+        verbose_name_plural = "Job Vacancies"  # This changes the plural name in the admin
+
 
 class Applicant(models.Model):
     # Basic Information
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)  # Track who created the record
+
     name = models.CharField(max_length=255)
     home_address = models.TextField()
 
@@ -171,7 +179,17 @@ class Applicant(models.Model):
     religion = models.CharField(max_length=100, choices=RELIGION_CHOICES)
 
     # Driving Information
-    driving_license = models.CharField(max_length=50, blank=True, null=True)
+    # Standard driving license types in Indonesia
+    DRIVING_LICENSE_CHOICES = [
+        ('SIM_A', 'SIM A (Private Passenger Vehicle)'),
+        ('SIM_B1', 'SIM B I (Truck)'),
+        ('SIM_B2', 'SIM B II (Large Truck or Trailer)'),
+        ('SIM_C', 'SIM C (Motorcycle)'),
+        ('SIM_D', 'SIM D (Disability Vehicle)'),
+    ]
+
+
+    driving_license = MultiSelectField(choices=DRIVING_LICENSE_CHOICES, max_length=50, blank=True, null=True)
     owns_car = models.BooleanField()
 
     # Medical Details
@@ -257,6 +275,8 @@ class Applicant(models.Model):
                   "FOR WITHDRAWL OF AN OFFER OR SUBSEQUENT DISMISSAL, IF EMPLOYED"
     )
 
+
+
 def __str__(self):
     return self.name
 
@@ -293,6 +313,10 @@ class EmploymentHistory(models.Model):
 
     def __str__(self):
         return f"{self.company_name} ({self.position_held})"
+
+    class Meta:
+        verbose_name = "Employement History"  # This changes the singular name in the admin
+        verbose_name_plural = "Employment History"  # This changes the plural name in the admin
 
 
 class Education(models.Model):
@@ -383,6 +407,10 @@ class Family(models.Model):
 
     def __str__(self):
         return f"{self.relationship}: {self.name}"
+
+    class Meta:
+        verbose_name = "Family"  # This changes the singular name in the admin
+        verbose_name_plural = "Families"  # This changes the plural name in the admin
 
 
 class ApplicantReference(models.Model):

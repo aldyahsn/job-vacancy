@@ -9,6 +9,7 @@ django-bootstrap5 = "*"
 django-admin-interface = "*"
 django-fieldsets-with-inlines = "*"
 django = "==4.*"
+django-multiselectfield = "*"
 
 [dev-packages]
 

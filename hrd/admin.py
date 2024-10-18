@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from fieldsets_with_inlines import FieldsetsInlineMixin
 
@@ -7,7 +8,39 @@ from hrd.models import Job, EmploymentHistory, Education, Family, Organization, 
 # Register your models here.
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    pass
+    # Fields to display in the list view
+    list_display = ('title', 'employment_type', 'min_salary', 'max_salary', 'currency', 'is_active', 'date_posted', 'application_deadline')
+
+    # Fields to filter the list by
+    list_filter = ('employment_type', 'is_active', 'date_posted', 'application_deadline')
+
+    # Fields to search for in the search bar
+    search_fields = ('title', 'qualifications', 'skills_required', 'description', 'contact_email')
+
+    # Fields to be grouped in the form view
+    fieldsets = (
+        ('Basic Job Details', {
+            'fields': ('title', 'description', 'employment_type')
+        }),
+        ('Job Requirements', {
+            'fields': ('qualifications', 'experience_required', 'skills_required')
+        }),
+        ('Salary and Benefits', {
+            'fields': ('min_salary', 'max_salary', 'currency', 'benefits')
+        }),
+        ('Job Posting Details', {
+            'fields': ('date_posted', 'application_deadline', 'contact_email', 'contact_phone')
+        }),
+        ('Status', {
+            'fields': ('is_active',)
+        }),
+    )
+
+    # Automatically populate the 'date_posted' field when a new job is added
+    readonly_fields = ('date_posted',)
+
+    # Add ordering
+    ordering = ('-date_posted',)  # Most recent jobs appear first
 
 
 # Applicant Admin
@@ -18,12 +51,12 @@ class EmploymentHistoryInline(admin.StackedInline):
 
 class EducationInline(admin.StackedInline):
     model = Education
-    extra = 3
+    extra = 4
     # classes = ['collapse']
 
 class FamilyInline(admin.StackedInline):
     model = Family
-    extra = 1
+    extra = 3
     # classes = ['collapse']
 
 class OrganizationInline(admin.TabularInline):
@@ -60,6 +93,7 @@ class ApplicantAdmin(FieldsetsInlineMixin, admin.ModelAdmin):
     search_fields = ('name', 'home_address', 'in_debt')
     list_filter = ('good_health', 'in_debt', 'engaged_in_business')
 
+
     # Include inlines for related models
     # inlines = [EmploymentHistoryInline, EducationInline, FamilyInline, OrganizationInline]
     fieldsets_with_inlines = [
@@ -67,6 +101,10 @@ class ApplicantAdmin(FieldsetsInlineMixin, admin.ModelAdmin):
             'fields': ('name', 'home_address', 'living_situation', 'sex', 'residence_phone', 'office_phone', 'mobile_phone'),
         }),
         EducationInline,  # Inline for education placed under Basic Information
+
+        ('COMPUTER PROFICIENCY', {
+           'fields': ('computer_proficient', 'computer_type', 'programs_languages'),
+        }),
 
         ('JOB INFORMATION', {
             'fields': ('position_applied_for', 'interested_in_other_positions', 'current_salary', 'salary_expected', 'current_remuneration_details'),
@@ -128,6 +166,21 @@ class ApplicantAdmin(FieldsetsInlineMixin, admin.ModelAdmin):
         }),
     ]
 
+    # Only show objects created by the currently logged-in user
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs  # Superusers can see all records
+        return qs.filter(created_by=request.user)  # Regular users can see only their own records
+
+    # Automatically set the `created_by` field to the current user
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:  # If the object is being created, not edited
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+
+
     # fieldsets = (
     #     ('Basic Information', {
     #         'fields': ('name', 'home_address', 'living_situation', 'sex', 'residence_phone', 'office_phone', 'mobile_phone'),
@@ -187,9 +240,53 @@ class ApplicantAdmin(FieldsetsInlineMixin, admin.ModelAdmin):
         return form
 
 
+class EmploymentHistoryAdmin(admin.ModelAdmin):
+    # list_display = ('applicant',)  # Display the associated applicant
+
+    # Filter employment histories based on the logged-in user’s applicants
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs  # Superusers can see all employment histories
+        return qs.filter(applicant__created_by=request.user)  # Show only records linked to the user's applicants
+
+
+class EducationAdmin(admin.ModelAdmin):
+    # list_display = ('applicant',)  # Display the associated applicant
+
+    # Filter education records based on the logged-in user’s applicants
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs  # Superusers can see all education records
+        return qs.filter(applicant__created_by=request.user)  # Show only records linked to the user's applicants
+
+class FamilyAdmin(admin.ModelAdmin):
+    # list_display = ('applicant',)  # Display the associated applicant
+
+    # Filter education records based on the logged-in user’s applicants
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs  # Superusers can see all education records
+        return qs.filter(applicant__created_by=request.user)  # Show only records linked to the user's applicants
+
+
+class OrganizationAdmin(admin.ModelAdmin):
+    list_display = ('applicant',)  # Display the associated applicant
+
+    # Filter education records based on the logged-in user’s applicants
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs  # Superusers can see all education records
+        return qs.filter(applicant__created_by=request.user)  # Show only records linked to the user's applicants
+
+
+
 # Register all models
 admin.site.register(Applicant, ApplicantAdmin)
-admin.site.register(EmploymentHistory)
-admin.site.register(Education)
-admin.site.register(Family)
-admin.site.register(Organization)
+admin.site.register(EmploymentHistory, EmploymentHistoryAdmin)
+admin.site.register(Education, EducationAdmin)
+admin.site.register(Family, FamilyAdmin)
+admin.site.register(Organization, OrganizationAdmin)

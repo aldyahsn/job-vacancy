@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from .forms import RegistrationForm, ApplicantForm
-from .models import Applicant, EmploymentHistory, Education, Family, Organization, ApplicantReference, Submission
+from .models import Applicant, EmploymentHistory, Education, Family, Organization, ApplicantReference, Submission, Job
 
 
 def register(request):
@@ -27,21 +27,31 @@ def register(request):
                     Family,
                     Organization,
                     ApplicantReference,
-                    Submission
+                    Submission,
+                    Job
                 ]
 
                 # Loop through each model and assign add, view, change, and delete permissions
                 for model in models_to_add_permissions:
                     content_type = ContentType.objects.get_for_model(model)
 
-                    # Retrieve the add, view, change, and delete permissions
-                    add_perm = Permission.objects.get(codename=f'add_{model._meta.model_name}', content_type=content_type)
-                    view_perm = Permission.objects.get(codename=f'view_{model._meta.model_name}', content_type=content_type)
-                    change_perm = Permission.objects.get(codename=f'change_{model._meta.model_name}', content_type=content_type)
-                    delete_perm = Permission.objects.get(codename=f'delete_{model._meta.model_name}', content_type=content_type)
+                    # Apply read-only permission for the Job model
+                    if model == Job:
+                        view_perm = Permission.objects.get(codename=f'view_{model._meta.model_name}', content_type=content_type)
+                        # Assign the view-only permission for the Job model
+                        user.user_permissions.add(view_perm)
+
+                    else:
+                        # Retrieve the add, view, change, and delete permissions
+                        add_perm = Permission.objects.get(codename=f'add_{model._meta.model_name}', content_type=content_type)
+                        view_perm = Permission.objects.get(codename=f'view_{model._meta.model_name}', content_type=content_type)
+                        change_perm = Permission.objects.get(codename=f'change_{model._meta.model_name}', content_type=content_type)
+                        delete_perm = Permission.objects.get(codename=f'delete_{model._meta.model_name}', content_type=content_type)
 
                     # Assign the permissions to the user
                     user.user_permissions.add(add_perm, view_perm, change_perm, delete_perm)
+
+
 
                 login(request, user)
                 messages.success(request, 'Registration successful! You can now log in.')
